@@ -2,9 +2,13 @@ import { defineStore } from "pinia";
 import { ref, computed, watch } from "vue";
 import { useActivityStore } from "@/stores/useActivityStore";
 
-const activityStore = useActivityStore();
+// ❌ WRONG: Do not call it here.
+// const activityStore = useActivityStore();
 
 export const useRoadmapStore = defineStore("roadmap", () => {
+  // ✅ CORRECT: Call it inside the store definition
+  const activityStore = useActivityStore();
+
   // We keep a single list, but drag-and-drop views will filter it.
   const defaultTasks = [
     {
@@ -41,9 +45,13 @@ export const useRoadmapStore = defineStore("roadmap", () => {
   // Vital for Drag and Drop: specific function to update status
   const updateStatus = (id, newStatus) => {
     const task = tasks.value.find((t) => t.id === id);
-    if (task) task.status = newStatus;
-    if (newStatus === "done") {
-      activityStore.logActivity(); // <--- Add this line!
+    if (task) {
+      task.status = newStatus;
+
+      // Now this works safely because activityStore is initialized
+      if (newStatus === "done") {
+        activityStore.logActivity();
+      }
     }
   };
 
